@@ -1,0 +1,83 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle.patcher'
+}
+
+group = 'lol.koblizek'
+version = '0.0.1'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'net.minecraftforge:mergetool:0.2.3.3:forge'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.1'
+}
+
+patcher {
+    exc = file("$rootDir/src/main/resources/forge.exc")
+    parent = project(':sources:clean')
+    patches = file("$rootDir/patches/minecraft")
+    patchedSrc = file('src/main/java')
+    srgPatches = true
+    notchObf = true
+    // accessTransformer = file("$rootDir/src/main/resources/forge_at.cfg")
+    //sideAnnotationStripper = file("$rootDir/src/main/resources/forge.sas")
+    processor = POST_PROCESSOR
+
+    runs {
+        forge_client {
+            taskName 'client'
+            // TODO: CHANGE
+            main 'net.minecraftforge.legacydev.MainClient'
+            environment 'mainClass',        'net.minecraft.launchwrapper.Launch'
+            environment 'assetIndex',       '{asset_index}'
+            environment 'assetDirectory',   '{assets_root}'
+            environment 'nativesDirectory', '{natives}'
+            environment 'MC_VERSION',       '${MC_VERSION}'
+            environment 'MCP_MAPPINGS',     '{mcp_mappings}'
+            environment 'MCP_TO_SRG',       '{mcp_to_srg}'
+//            environment 'FORGE_GROUP',      "${project.group}"
+//            environment 'FORGE_VERSION',    "${project.version.substring(MC_VERSION.length() + 1)}"
+        }
+
+        forge_server {
+            taskName 'server'
+            // TODO: CHANGE
+            main 'net.minecraftforge.legacydev.MainServer'
+            environment 'mainClass',        'net.minecraft.launchwrapper.Launch'
+            environment 'MC_VERSION',       '${MC_VERSION}'
+            environment 'MCP_MAPPINGS',     '{mcp_mappings}'
+            environment 'MCP_TO_SRG',       '{mcp_to_srg}'
+//            environment 'FORGE_GROUP',      "${project.group}"
+//            environment 'FORGE_VERSION',    "${project.version.substring(MC_VERSION.length() + 1)}"
+        }
+    }
+}
+
+applyPatches {
+    canonicalizeAccess true
+    canonicalizeWhitespace true
+    maxFuzz 3
+    originalPrefix = '../src-base/minecraft/'
+    modifiedPrefix = '../src-work/minecraft/'
+}
+
+genPatches {
+    originalPrefix = '../src-base/minecraft/'
+    modifiedPrefix = '../src-work/minecraft/'
+}
+
+task setup() {
+    group 'legacyloader'
+    dependsOn ':sources:clean:extractMapped'
+    dependsOn ':sources:minecraft:extractMapped' //These must be strings so that we can do lazy resolution. Else we need evaluationDependsOnChildren above
+}
+
+test {
+    useJUnitPlatform()
+}

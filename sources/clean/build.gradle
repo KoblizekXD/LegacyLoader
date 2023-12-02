@@ -1,0 +1,55 @@
+plugins {
+    id 'java'
+    id 'net.minecraftforge.gradle.patcher'
+}
+
+evaluationDependsOn(":sources:mcp")
+
+group = 'lol.koblizek'
+version = '0.0.1'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'net.minecraftforge:mergetool:0.2.3.3:forge'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.1'
+}
+
+patcher {
+    parent = project(':sources:mcp')
+    mcVersion = MC_VERSION
+    patchedSrc = file('src/main/java')
+
+    mappings channel: MAPPING_CHANNEL, version: MAPPING_VERSION
+    processor = POST_PROCESSOR
+
+    runs {
+        clean_client {
+            taskName 'clean_client'
+
+            main 'net.minecraft.client.main.Main'
+            workingDirectory file('run')
+
+            args '--gameDir', '.'
+            args '--version', MC_VERSION
+            args '--assetsDir', downloadAssets.output
+            args '--assetIndex', '{asset_index}'
+            args '--accessToken', '0'
+        }
+
+        clean_server {
+            taskName 'clean_server'
+
+            main 'net.minecraft.server.MinecraftServer'
+            workingDirectory file('run')
+        }
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
