@@ -28,8 +28,8 @@ patcher {
     processor = POST_PROCESSOR
 
     runs {
-        clean_client {
-            taskName 'clean_client'
+        CleanGameClient {
+            taskName 'cleanGameClient'
 
             main 'net.minecraft.client.main.Main'
             workingDirectory file('run')
@@ -41,8 +41,8 @@ patcher {
             args '--accessToken', '0'
         }
 
-        clean_server {
-            taskName 'clean_server'
+        CleanGameServer {
+            taskName 'cleanGameServer'
 
             main 'net.minecraft.server.MinecraftServer'
             workingDirectory file('run')

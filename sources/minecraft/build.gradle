@@ -30,31 +30,25 @@ patcher {
     processor = POST_PROCESSOR
 
     runs {
-        forge_client {
-            taskName 'client'
-            // TODO: CHANGE
-            main 'net.minecraftforge.legacydev.MainClient'
-            environment 'mainClass',        'net.minecraft.launchwrapper.Launch'
-            environment 'assetIndex',       '{asset_index}'
-            environment 'assetDirectory',   '{assets_root}'
-            environment 'nativesDirectory', '{natives}'
-            environment 'MC_VERSION',       '${MC_VERSION}'
-            environment 'MCP_MAPPINGS',     '{mcp_mappings}'
-            environment 'MCP_TO_SRG',       '{mcp_to_srg}'
-//            environment 'FORGE_GROUP',      "${project.group}"
-//            environment 'FORGE_VERSION',    "${project.version.substring(MC_VERSION.length() + 1)}"
+        ModifiedGameClient {
+            taskName 'modifiedGameClient'
+            main 'net.minecraft.client.main.Main'
+            workingDirectory file('run')
+
+            args '--gameDir', '.'
+            args '--version', MC_VERSION
+            args '--assetsDir', downloadAssets.output
+            args '--assetIndex', '{asset_index}'
+            args '--accessToken', '0'
+            jvmArgs '-Djava.library.path=../build/natives/'
         }
 
-        forge_server {
-            taskName 'server'
-            // TODO: CHANGE
-            main 'net.minecraftforge.legacydev.MainServer'
-            environment 'mainClass',        'net.minecraft.launchwrapper.Launch'
-            environment 'MC_VERSION',       '${MC_VERSION}'
-            environment 'MCP_MAPPINGS',     '{mcp_mappings}'
-            environment 'MCP_TO_SRG',       '{mcp_to_srg}'
-//            environment 'FORGE_GROUP',      "${project.group}"
-//            environment 'FORGE_VERSION',    "${project.version.substring(MC_VERSION.length() + 1)}"
+        ModifiedGameServer {
+            taskName 'modifiedGameServer'
+
+            main 'net.minecraft.server.MinecraftServer'
+            jvmArgs '-Djava.library.path', '../build/'
+            workingDirectory file('run')
         }
     }
 }
